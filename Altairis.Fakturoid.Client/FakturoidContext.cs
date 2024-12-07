@@ -9,9 +9,10 @@ namespace Altairis.Fakturoid.Client {
     /// Class representing connection to Fakturoid API, holds authentication information etc.
     /// </summary>
     public class FakturoidContext {
-        private const string DEFAULT_USER_AGENT = "C#/.NET API Client v2 by Altairis (fakturoid@rider.cz)";
-        private const string API_BASE_URL_FORMAT = "https://app.fakturoid.cz/api/v2/accounts/{0}/";
+        private const string DEFAULT_USER_AGENT = "C#/.NET API Client v3 by Altairis (fakturoid@rider.cz)";
+        private const string API_BASE_URL_FORMAT = "https://app.fakturoid.cz/api/v3/accounts/{0}/";
         private readonly GetCustomHttpClient getCustomHttpClient;
+        private readonly GetAuthenticationHeaderValue getAuthenticationHeaderValue;
 
         /// <summary>
         /// To provide custom http client
@@ -19,6 +20,12 @@ namespace Altairis.Fakturoid.Client {
         /// <param name="uri"></param>
         /// <returns></returns>
         public delegate HttpClient GetCustomHttpClient(Uri uri);
+
+        /// <summary>
+        /// To provide authentication header value
+        /// </summary>
+        /// <returns></returns>
+        public delegate AuthenticationHeaderValue GetAuthenticationHeaderValue();
 
         // Constructor
         /// <summary>
@@ -29,6 +36,7 @@ namespace Altairis.Fakturoid.Client {
         /// <param name="authenticationToken">The authentication token.</param>
         /// <param name="userAgent">The User-Agent HTTP header value.</param>
         /// <param name="getCustomHttpClient">Getter for custom http client</param>
+        /// <param name="getAuthenticationHeaderValue">Getter for authentication header value</param>
         /// <exception cref="ArgumentNullException">accountName
         /// or
         /// authenticationToken
@@ -39,7 +47,7 @@ namespace Altairis.Fakturoid.Client {
         /// Value cannot be empty or whitespace only string.;authenticationToken
         /// or
         /// Value cannot be empty or whitespace only string.;userAgent</exception>
-        public FakturoidContext(string accountName, string emailAddress, string authenticationToken, string userAgent = DEFAULT_USER_AGENT, GetCustomHttpClient getCustomHttpClient = null) {
+        public FakturoidContext(string accountName, string emailAddress, string authenticationToken, string userAgent = DEFAULT_USER_AGENT, GetCustomHttpClient getCustomHttpClient = null, GetAuthenticationHeaderValue getAuthenticationHeaderValue = null) {
             if (accountName == null) throw new ArgumentNullException(nameof(accountName));
             if (string.IsNullOrWhiteSpace(accountName)) throw new ArgumentException("Value cannot be empty or whitespace only string.", nameof(accountName));
             if (emailAddress == null) throw new ArgumentNullException(nameof(emailAddress));
@@ -64,6 +72,12 @@ namespace Altairis.Fakturoid.Client {
             this.BankAccounts = new FakturoidBankAccountsProxy(this);
 
             this.getCustomHttpClient = getCustomHttpClient;
+            this.getAuthenticationHeaderValue = getAuthenticationHeaderValue ?? (() =>
+                {
+                    // Get value of authentication header
+                    var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Join(":", this.EmailAddress, this.AuthenticationToken)));
+                    return new AuthenticationHeaderValue("Basic", authHeader);
+                });
         }
 
         // Properties
@@ -150,16 +164,13 @@ namespace Altairis.Fakturoid.Client {
         /// </summary>
         /// <returns>Instance of <see cref="System.Net.Http.HttpClient"/> class, initialized for use with Fakturoid API.</returns>
         internal HttpClient GetHttpClient() {
-            // Get value of authentication header
-            var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Join(":", this.EmailAddress, this.AuthenticationToken)));
-
             // Setup HTTP client
             var baseAddress = new Uri(string.Format(API_BASE_URL_FORMAT, this.AccountName));
             var client = this.getCustomHttpClient is not null ? this.getCustomHttpClient(baseAddress) : new HttpClient { BaseAddress = baseAddress };
 
             client.DefaultRequestHeaders.Add("User-Agent", this.UserAgent);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeader);
+            client.DefaultRequestHeaders.Authorization = this.getAuthenticationHeaderValue();
 
             return client;
         }

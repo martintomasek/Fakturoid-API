@@ -451,6 +451,40 @@ namespace Altairis.Fakturoid.Client {
         }
 
         /// <summary>
+        /// Create Payment
+        /// </summary>
+        /// <param name="id">The invoice id.</param>
+        /// <param name="payment">The payment.</param>
+        public async Task<int> CreatePaymentAsync(int id, JsonPayment payment) {
+
+            if (id < 1) throw new ArgumentOutOfRangeException(nameof(id), "Value must be greater than zero.");
+
+            // Create new entity
+            var urlFormat = "invoices/{0}/payments.json";
+            var c = this.Context.GetHttpClient();
+            var r = await c.PostAsJsonAsync(string.Format(urlFormat, id), payment);
+            r.EnsureFakturoidSuccess();
+
+            var result = await r.Content.ReadAsAsync<JsonPayment>();
+            if (result.id is null)
+                throw new FormatException("Missing id of new entity");
+            return result.id.Value;
+        }
+
+        /// <summary>
+        /// Delete Invoice Payment
+        /// </summary>
+        /// <param name="id">The invoice id.</param>
+        public async Task DeletePaymentAsync(int id) {
+            if (id < 1) throw new ArgumentOutOfRangeException(nameof(id), "Value must be greater than zero.");
+
+            var urlFormat = "invoices/{0}/payments.json";
+            var c = this.Context.GetHttpClient();
+            var r = await c.DeleteAsync(string.Format(urlFormat, id));
+            r.EnsureFakturoidSuccess();
+        }
+
+        /// <summary>
         /// Sets attachment for invoice.
         /// </summary>
         /// <param name="id">The invoice id.</param>

@@ -110,3 +110,5 @@ UpgradeLog*.XML
 /Documentation/Help
 .vs/
 .nuget
+/Altairis.Fakturoid.Client/Properties/PublishProfiles
+/NuGet.config

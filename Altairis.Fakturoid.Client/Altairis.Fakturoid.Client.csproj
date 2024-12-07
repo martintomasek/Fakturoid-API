@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latestMajor</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.11.1</Version>
+    <Version>2.17.0</Version>
     <Authors>Michal Altair Valášek</Authors>
     <Company>Altairis</Company>
     <Product />
@@ -45,8 +45,8 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="mddox &quot;$(TargetPath)&quot; -o &quot;$(SolutionDir)\API-Reference.md&quot; -f github -n -d" />
-  </Target>
+  </Target>-->
 
 </Project>
