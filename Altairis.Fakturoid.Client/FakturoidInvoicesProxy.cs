@@ -159,14 +159,15 @@ namespace Altairis.Fakturoid.Client {
         /// <param name="status">The invoice status.</param>
         /// <param name="subjectId">The customer subject id.</param>
         /// <param name="since">The date since when the invoice was created.</param>
+        /// <param name="until">The date until the invoice was created.</param>
         /// <param name="number">The invoice display number.</param>
         /// <returns>
         /// List of <see cref="JsonInvoice" /> instances.
         /// </returns>
         /// <exception cref="System.ArgumentOutOfRangeException">subjectId;Value must be greater than zero.</exception>
-        public IEnumerable<JsonInvoice> Select(InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, string number = null) {
+        public IEnumerable<JsonInvoice> Select(InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, DateTime? until = null, string number = null) {
             try {
-                return this.SelectAsync(type, status, subjectId, since, number).Result;
+                return this.SelectAsync(type, status, subjectId, since, until, number).Result;
             } catch (AggregateException aex) {
                 throw aex.InnerException;
             }
@@ -179,12 +180,13 @@ namespace Altairis.Fakturoid.Client {
         /// <param name="status">The invoice status.</param>
         /// <param name="subjectId">The customer subject id.</param>
         /// <param name="since">The date since when the invoice was created.</param>
+        /// <param name="until">The date until the invoice was created.</param>
         /// <param name="number">The invoice display number.</param>
         /// <returns>
         /// List of <see cref="JsonInvoice" /> instances.
         /// </returns>
         /// <exception cref="System.ArgumentOutOfRangeException">subjectId;Value must be greater than zero.</exception>
-        public Task<IEnumerable<JsonInvoice>> SelectAsync(InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, string number = null) {
+        public Task<IEnumerable<JsonInvoice>> SelectAsync(InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, DateTime? until = null, string number = null) {
             if (subjectId.HasValue && subjectId.Value < 1) throw new ArgumentOutOfRangeException(nameof(subjectId), "Value must be greater than zero.");
             var uri = type switch {
                 InvoiceTypeCondition.Proforma => "invoices/proforma.json",
@@ -217,6 +219,7 @@ namespace Altairis.Fakturoid.Client {
                 status = statusString,
                 subject_id = subjectId.HasValue ? subjectId.Value.ToString() : null,
                 since,
+                until,
                 number
             };
 
@@ -232,6 +235,7 @@ namespace Altairis.Fakturoid.Client {
         /// <param name="status">The invoice status.</param>
         /// <param name="subjectId">The customer subject id.</param>
         /// <param name="since">The date since when the invoice was created.</param>
+        /// <param name="until">The date until the invoice was created.</param>
         /// <param name="number">The invoice display number.</param>
         /// <returns>
         /// List of <see cref="JsonInvoice" /> instances.
@@ -241,9 +245,9 @@ namespace Altairis.Fakturoid.Client {
         /// or
         /// subjectId;Value must be greater than zero.
         /// </exception>
-        public IEnumerable<JsonInvoice> Select(int page, InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, string number = null) {
+        public IEnumerable<JsonInvoice> Select(int page, InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, DateTime? until = null, string number = null) {
             try {
-                return this.SelectAsync(page, type, status, subjectId, since, number).Result;
+                return this.SelectAsync(page, type, status, subjectId, since, until, number).Result;
             } catch (AggregateException aex) {
                 throw aex.InnerException;
             }
@@ -257,6 +261,7 @@ namespace Altairis.Fakturoid.Client {
         /// <param name="status">The invoice status.</param>
         /// <param name="subjectId">The customer subject id.</param>
         /// <param name="since">The date since when the invoice was created.</param>
+        /// <param name="until">The date until the invoice was created.</param>
         /// <param name="number">The invoice display number.</param>
         /// <returns>
         /// List of <see cref="JsonInvoice" /> instances.
@@ -266,7 +271,7 @@ namespace Altairis.Fakturoid.Client {
         /// or
         /// subjectId;Value must be greater than zero.
         /// </exception>
-        public Task<IEnumerable<JsonInvoice>> SelectAsync(int page, InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, string number = null) {
+        public Task<IEnumerable<JsonInvoice>> SelectAsync(int page, InvoiceTypeCondition type = InvoiceTypeCondition.Any, InvoiceStatusCondition status = InvoiceStatusCondition.Any, int? subjectId = null, DateTime? since = null, DateTime? until = null, string number = null) {
             if (page < 1) throw new ArgumentOutOfRangeException(nameof(page), "Value must be greater than zero.");
             if (subjectId.HasValue && subjectId.Value < 1) throw new ArgumentOutOfRangeException(nameof(subjectId), "Value must be greater than zero.");
             var uri = type switch {
@@ -300,6 +305,7 @@ namespace Altairis.Fakturoid.Client {
                 status = statusString,
                 subject_id = subjectId.HasValue ? subjectId.Value.ToString() : null,
                 since,
+                until,
                 number
             };
 
